@@ -64,7 +64,7 @@ Begin VB.Form FPOCommit
       _ExtentX        =   3201
       _ExtentY        =   556
       _Version        =   393216
-      Format          =   103481345
+      Format          =   103940097
       CurrentDate     =   37718
    End
    Begin VB.Label lblPONum 
@@ -163,15 +163,15 @@ Public Sub Init(rstLines As ADODB.Recordset, VendKey As Long, userid As String, 
     g_rstShipVia.Filter = adFilterNone
 
     Set orst = LoadDiscRst("SELECT MatchToleranceKey FROM tapVendor WHERE VendKey=" & VendKey)
-    m_lMatchToleranceKey = orst.Fields("MatchToleranceKey").value   'cache this for PO commit
+    m_lMatchToleranceKey = orst.Fields("MatchToleranceKey").Value   'cache this for PO commit
 
-    dtRequest.value = DateAdd("d", 1, Now)
+    dtRequest.Value = DateAdd("d", 1, Now)
     
     cmdCommit.Visible = True
     cmdCancel.Visible = True
     cmdOK.Visible = False
     lblPONum.Visible = False
-    lblPONum.caption = vbNullString
+    lblPONum.Caption = vbNullString
     
     Me.Show vbModal
 End Sub
@@ -245,7 +245,6 @@ Private Sub cmdCommit_Click()
     End With
         
     'VL 11/19/2015 fix provided by Jimmy Thomas from BlytheCo
-    'Make sure this comment is tracked by git
     UpdateShipToAddress
     
     sContext = "Creating Purchase Order"
@@ -272,7 +271,7 @@ Private Sub cmdCommit_Click()
     lblPONum.Visible = True
     cmdOK.Visible = True
     cmdOK.SetFocus
-    lblPONum.caption = m_sTranID
+    lblPONum.Caption = m_sTranID
     
     Exit Sub
     
@@ -312,7 +311,7 @@ Private Sub UpdateRequestDate(ByVal i_lPOKey As Long)
     With cmd
         .ActiveConnection = g_DB.Connection
         .CommandType = adCmdText
-        .CommandText = "Update tpoPurchOrder SET DfltRequestDate = '" & dtRequest.value & "' where POKey = " & i_lPOKey
+        .CommandText = "Update tpoPurchOrder SET DfltRequestDate = '" & dtRequest.Value & "' where POKey = " & i_lPOKey
         .Execute
     End With
     
@@ -342,11 +341,11 @@ Private Sub GetPOAPIOptions(ByRef o_lSpid As Long)
     
     Set cmd = CreateCommandSP("sppoGetPOAPIOptions")
     With cmd
-        .Parameters("@_iCompanyID").value = "CPC"
-        .Parameters("@_iLogSuccessful").value = Null
+        .Parameters("@_iCompanyID").Value = "CPC"
+        .Parameters("@_iLogSuccessful").Value = Null
         .Execute
-        iRetVal = .Parameters("@_oRetVal").value
-        o_lSpid = .Parameters("@_oSpid").value
+        iRetVal = .Parameters("@_oRetVal").Value
+        o_lSpid = .Parameters("@_oSpid").Value
     End With
     Set cmd = Nothing
     If iRetVal > 2 Then
@@ -366,7 +365,7 @@ Private Sub GetPurchOrdDflts(i_lSpid As Long)
     'wrapper SP
     Set cmd = CreateCommandSP("spcpGetPurchOrdDflts")
     With cmd
-        .Parameters("@_iVendKey").value = m_lVendKey
+        .Parameters("@_iVendKey").Value = m_lVendKey
 
         If g_DB.IsDevelopment Then
             userid = InputBox("Enter BuyerID:", "Create PO (Development Only)")
@@ -375,24 +374,24 @@ Private Sub GetPurchOrdDflts(i_lSpid As Long)
             userid = m_sUserID
         End If
         
-        .Parameters("@_iUserID").value = userid
+        .Parameters("@_iUserID").Value = userid
         '.Parameters("@_iDfltShipToAddrKey").value = User.GetUserWhseShipAddrKey(userid)
 
-        .Parameters("@_iStatus").value = 0      'unissued
-        .Parameters("@_iTranCmnt").value = Left(txtComment.text, 50)
-        .Parameters("@_iMatchToleranceKey").value = m_lMatchToleranceKey
-        .Parameters("@_iDSTWhseID").value = m_sWhseID
-        .Parameters("@_iDfltShipMethKey").value = cboShipVia.ItemData(cboShipVia.ListIndex)
+        .Parameters("@_iStatus").Value = 0      'unissued
+        .Parameters("@_iTranCmnt").Value = Left(txtComment.text, 50)
+        .Parameters("@_iMatchToleranceKey").Value = m_lMatchToleranceKey
+        .Parameters("@_iDSTWhseID").Value = m_sWhseID
+        .Parameters("@_iDfltShipMethKey").Value = cboShipVia.ItemData(cboShipVia.ListIndex)
         
         'These support the service that fixes Unassigned Buyer
-        .Parameters("@_iUserFld1").value = CStr(UserNameToBuyerKey(m_sUserID))
-        .Parameters("@_iUserFld2").value = CStr(cboShipVia.ItemData(cboShipVia.ListIndex))
+        .Parameters("@_iUserFld1").Value = CStr(UserNameToBuyerKey(m_sUserID))
+        .Parameters("@_iUserFld2").Value = CStr(cboShipVia.ItemData(cboShipVia.ListIndex))
 
         .Execute
         
-        m_lPOKey = .Parameters("@POKey").value
-        m_sTranID = .Parameters("@TranID").value
-        iRetVal = .Parameters("@RetVal").value
+        m_lPOKey = .Parameters("@POKey").Value
+        m_sTranID = .Parameters("@TranID").Value
+        iRetVal = .Parameters("@RetVal").Value
     End With
     
     If iRetVal > 2 Then
@@ -430,20 +429,20 @@ Private Sub GetPOItem(i_oRst As ADODB.Recordset, i_lSpid As Long)
     If i_oRst.Fields("isSPO") Then
         If i_oRst.Fields("SOLineKey") > 0 Then
             Set ocmd = CreateCommandSP("spcpcPOGetSPODetail")
-            ocmd.Parameters("@_iSOLineKey").value = i_oRst.Fields("SOLineKey").value
+            ocmd.Parameters("@_iSOLineKey").Value = i_oRst.Fields("SOLineKey").Value
             
             Set orst = New ADODB.Recordset
             Set orst = ocmd.Execute
             If Not orst.EOF Then
                 'cache these for logging
-                lOPKey = orst.Fields("OPKey").value
-                lSOKey = Trim(orst.Fields("TranKey").value)
+                lOPKey = orst.Fields("OPKey").Value
+                lSOKey = Trim(orst.Fields("TranKey").Value)
                 
-                If Len(orst.Fields("ModelNbr").value) > 0 Then
-                    sComment = sComment & "Model # " & Trim(orst.Fields("ModelNbr").value)
+                If Len(orst.Fields("ModelNbr").Value) > 0 Then
+                    sComment = sComment & "Model # " & Trim(orst.Fields("ModelNbr").Value)
                 End If
-                If Len(orst.Fields("SerialNbr").value) > 0 Then
-                    sComment = sComment & "; Serial # " & Trim(orst.Fields("SerialNbr").value)
+                If Len(orst.Fields("SerialNbr").Value) > 0 Then
+                    sComment = sComment & "; Serial # " & Trim(orst.Fields("SerialNbr").Value)
                 End If
                 sComment = sComment & "; OP " & lOPKey
                 sComment = sComment & "; SO " & lSOKey
@@ -456,19 +455,19 @@ Private Sub GetPOItem(i_oRst As ADODB.Recordset, i_lSpid As Long)
     'wrapper SP
     Set ocmd = CreateCommandSP("spcpGetPOitem")
     With ocmd
-        .Parameters("@_iPOKey").value = m_lPOKey
-        .Parameters("@_iClosedForRcvg").value = 0
-        .Parameters("@_iClosedForInvc").value = 0
-        .Parameters("@_iDescription").value = i_oRst.Fields("Descr").value
-        .Parameters("@_iStatus").value = 1      'Open
-        .Parameters("@_iItemKey").value = i_oRst.Fields("ItemKey").value
-        .Parameters("@_iUnitCost").value = i_oRst.Fields("UnitCost").value
+        .Parameters("@_iPOKey").Value = m_lPOKey
+        .Parameters("@_iClosedForRcvg").Value = 0
+        .Parameters("@_iClosedForInvc").Value = 0
+        .Parameters("@_iDescription").Value = i_oRst.Fields("Descr").Value
+        .Parameters("@_iStatus").Value = 1      'Open
+        .Parameters("@_iItemKey").Value = i_oRst.Fields("ItemKey").Value
+        .Parameters("@_iUnitCost").Value = i_oRst.Fields("UnitCost").Value
         If Len(sComment) > 0 Then
-            .Parameters("@_iExtCmnt").value = Left(sComment, 254)
+            .Parameters("@_iExtCmnt").Value = Left(sComment, 254)
         End If
         .Execute
-        m_lLineKey = .Parameters("@POLineKey").value
-        iRetVal = .Parameters("@RetVal").value
+        m_lLineKey = .Parameters("@POLineKey").Value
+        iRetVal = .Parameters("@RetVal").Value
     End With
     
     If iRetVal > 2 Then
@@ -482,14 +481,14 @@ Private Sub GetPOItem(i_oRst As ADODB.Recordset, i_lSpid As Long)
     If i_oRst.Fields("isSPO") Then
         Debug.Print "SOLKey = " & i_oRst.Fields("SOLineKey") & ", POLKey " & m_lLineKey
         Set ocmd = CreateCommandSP("spCPCInsertSPLPOFreeze")
-        ocmd.Parameters("@_iSOLineKey").value = i_oRst.Fields("SOLineKey").value
-        ocmd.Parameters("@_iPOLineKey").value = m_lLineKey
-        ocmd.Parameters("@_iPOKey").value = m_lPOKey
-        ocmd.Parameters("@_iPOTranNo").value = Right$(m_sTranID, 10)
+        ocmd.Parameters("@_iSOLineKey").Value = i_oRst.Fields("SOLineKey").Value
+        ocmd.Parameters("@_iPOLineKey").Value = m_lLineKey
+        ocmd.Parameters("@_iPOKey").Value = m_lPOKey
+        ocmd.Parameters("@_iPOTranNo").Value = Right$(m_sTranID, 10)
         ocmd.Execute
-        sMsg = "Freeze item - " & Trim(i_oRst.Fields("Descr")) & " on PO line " & m_lLineKey & ". The vendor is " & Trim(i_oRst.Fields("VendName").value)
-        LogDB.LogOAEvent "Auto Freeze", GetUserID, m_lLineKey, i_oRst.Fields("SOLineKey").value, , sMsg
-        LogDB.LogActivity "SA", sMsg, lOPKey, lSOKey, , i_oRst.Fields("SOLineKey").value, m_lPOKey, Right$(m_sTranID, 10), m_lLineKey
+        sMsg = "Freeze item - " & Trim(i_oRst.Fields("Descr")) & " on PO line " & m_lLineKey & ". The vendor is " & Trim(i_oRst.Fields("VendName").Value)
+        LogDB.LogOAEvent "Auto Freeze", GetUserID, m_lLineKey, i_oRst.Fields("SOLineKey").Value, , sMsg
+        LogDB.LogActivity "SA", sMsg, lOPKey, lSOKey, , i_oRst.Fields("SOLineKey").Value, m_lPOKey, Right$(m_sTranID, 10), m_lLineKey
     End If
 End Sub
 
@@ -507,14 +506,14 @@ Private Sub GetPOLineDist(i_oRst As ADODB.Recordset, i_lSpid As Long)
     Set ocmd = CreateCommandSP("spcpGetPOLineDist")
     
     With ocmd
-        .Parameters("@_iPOKey").value = m_lPOKey
-        .Parameters("@_iPOLineKey").value = m_lLineKey
-        .Parameters("@_iStatus").value = 1
-        .Parameters("@_iQtyOrd") = i_oRst.Fields("QtyToOrder").value
-        .Parameters("@_iGLAcctKey").value = Null
+        .Parameters("@_iPOKey").Value = m_lPOKey
+        .Parameters("@_iPOLineKey").Value = m_lLineKey
+        .Parameters("@_iStatus").Value = 1
+        .Parameters("@_iQtyOrd") = i_oRst.Fields("QtyToOrder").Value
+        .Parameters("@_iGLAcctKey").Value = Null
         .Execute
-        m_lLineDistKey = .Parameters("@POLineDistKey").value
-        iRetVal = .Parameters("@RetVal").value
+        m_lLineDistKey = .Parameters("@POLineDistKey").Value
+        iRetVal = .Parameters("@RetVal").Value
     End With
     Set ocmd = Nothing
     If iRetVal > 2 Then
@@ -535,10 +534,10 @@ Private Sub POLineAmts(i_lSpid As Long)
     Set ocmd = CreateCommandSP("sppoLineAmts")
     
     With ocmd
-        .Parameters("@_iPOKey").value = m_lPOKey
-        .Parameters("@_iPOLineKey").value = m_lLineKey
+        .Parameters("@_iPOKey").Value = m_lPOKey
+        .Parameters("@_iPOLineKey").Value = m_lLineKey
         .Execute
-        iRetVal = .Parameters("@_oRetVal").value
+        iRetVal = .Parameters("@_oRetVal").Value
     End With
     Set ocmd = Nothing
     If iRetVal > 2 Then
@@ -556,16 +555,16 @@ Private Sub CreatePurchOrder(ByRef o_lSpid As Long)
     
     Set ocmd = CreateCommandSP("sppoCreatePurchOrder")
     With ocmd
-        .Parameters("@_iPOKey").value = m_lPOKey
-        .Parameters("@_iPurchAmt").value = Null
-        .Parameters("@_iFreightAmt").value = Null
-        .Parameters("@_iSTaxAmt").value = Null
-        .Parameters("@_iTranAmt").value = Null
-        .Parameters("@_iOpenAmt").value = Null
-        .Parameters("@_iAmtInvcd").value = Null
-        .Parameters("@_iUseTemp").value = 0
+        .Parameters("@_iPOKey").Value = m_lPOKey
+        .Parameters("@_iPurchAmt").Value = Null
+        .Parameters("@_iFreightAmt").Value = Null
+        .Parameters("@_iSTaxAmt").Value = Null
+        .Parameters("@_iTranAmt").Value = Null
+        .Parameters("@_iOpenAmt").Value = Null
+        .Parameters("@_iAmtInvcd").Value = Null
+        .Parameters("@_iUseTemp").Value = 0
         .Execute
-        iRetVal = .Parameters("@_oRetVal").value
+        iRetVal = .Parameters("@_oRetVal").Value
     End With
     Set ocmd = Nothing
     If iRetVal > 2 Then
@@ -590,7 +589,7 @@ Private Sub DisplayPOAPIError(sSPName As String, i_lSpid As Long)
             msg Trim(rst.Fields("StringData1")) & " is marked as Discontinued. Remove it from the PO and try again."
         Else
             msg "SPROC - " & sSPName & vbCrLf & _
-                "ErrorCmnt - " & rst.Fields("ErrorCmnt").value & vbCrLf & _
+                "ErrorCmnt - " & rst.Fields("ErrorCmnt").Value & vbCrLf & _
                 "StringNo - " & rst.Fields("StringNo") & vbCrLf & _
                 "StringData1 - " & rst.Fields("StringData1") & vbCrLf & _
                 "StringDate2 - " & rst.Fields("StringData2") & vbCrLf & _
