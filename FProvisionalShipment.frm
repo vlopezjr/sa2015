@@ -246,6 +246,14 @@ Begin VB.Form FProvisionalShipment
          TabIndex        =   4
          Top             =   2760
          Width           =   10215
+         Begin VB.CommandButton cmdOk 
+            Caption         =   "Ok"
+            Height          =   375
+            Left            =   7200
+            TabIndex        =   23
+            Top             =   3120
+            Width           =   975
+         End
          Begin VB.CommandButton cmdSave 
             Caption         =   "Save"
             Height          =   375
@@ -389,7 +397,7 @@ Private m_lWindowID As Long
 
 Private m_sDocId As String
 
-Private m_sOPId As String
+Private m_sOPID As String
 Private m_sSOId As String
 Private m_sPOId As String
 
@@ -442,7 +450,7 @@ Public Property Let WindowID(ByVal lNewValue As Long)
 End Property
 
 Public Sub SetCaption(ByRef i_sTitle As String)
-    Me.Caption = i_sTitle
+    Me.caption = i_sTitle
     MDIMain.UpdateCaption Me
 End Sub
 
@@ -479,6 +487,10 @@ Public Sub CreateShipment(Caller As Form)
     Me.ZOrder
 End Sub
 
+
+Private Sub cmdOk_Click()
+    MsgBox ("OK")
+End Sub
 
 '********** Form Events ********************************
 
@@ -659,18 +671,18 @@ Private Sub LoadOrderHeader()
 
     If rst.RecordCount > 0 Then
         With rst
-            m_sOPId = .Fields("OPKey")
+            m_sOPID = .Fields("OPKey")
             m_sSOId = .Fields("SOId")
             m_sPOId = .Fields("POId")
             m_lOPKey = .Fields("OPKey")
             m_lSOKey = .Fields("SOKey")
             m_lPOKey = .Fields("POKey")
 
-            lblOpKeyValue.Caption = m_sOPId
-            lblSoNumberValue.Caption = m_sSOId
-            lblPoNumberValue.Caption = m_sPOId
+            lblOpKeyValue.caption = m_sOPID
+            lblSoNumberValue.caption = m_sSOId
+            lblPoNumberValue.caption = m_sPOId
             
-            lblCustVendor.Caption = .Fields("CustId") & " | " & .Fields("VendName")
+            lblCustVendor.caption = .Fields("CustId") & " | " & .Fields("VendName")
         End With
     End If
 
@@ -943,7 +955,7 @@ Private Sub cmdCreateShipment_Click()
     
     Dim cmd As ADODB.Command
     Dim sql As String
-    Dim pskey As Integer
+    Dim psKey As Integer
     
     'INSERT INTO THE PROV SHIPMENT TABLE
     sql = "insert into tcpProvisionalShipment (OpKey, CreateDate, CreateUserId) " _
@@ -1138,10 +1150,10 @@ Private Sub UpdateClosedShipmentItem()
     Dim lShipKey As Long
     Dim rst As ADODB.Recordset
     
-    If IsNull(m_gwShipments.Value("Shipkey")) Then Exit Sub
+    If IsNull(m_gwShipments.value("Shipkey")) Then Exit Sub
     
     SetWaitCursor True
-    lShipKey = m_gwShipments.Value("ShipKey")
+    lShipKey = m_gwShipments.value("ShipKey")
     
    
    Set rst = CallSP("spOPOrdStatShipDtl1", "@i_ShipKey", lShipKey)
