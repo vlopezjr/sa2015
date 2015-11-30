@@ -133,7 +133,7 @@ Private m_bLoading As Boolean
 '****************************************************************************
 
 Private Sub Class_Initialize()
-    Set m_oCustomer = New Customer
+    'Set m_oCustomer = New Customer
     
     Set m_oItems = New Items
     Set m_oBackUpItems = New Items
@@ -261,11 +261,11 @@ Public Property Let IsWalkup(ByVal bNewValue As Boolean)
 End Property
 
 
-Public Property Get IsMisc() As Boolean
-    IsMisc = m_udtOrder.bMisc
+Public Property Get isMisc() As Boolean
+    isMisc = m_udtOrder.bMisc
 End Property
 
-Public Property Let IsMisc(ByVal bNewValue As Boolean)
+Public Property Let isMisc(ByVal bNewValue As Boolean)
     m_udtOrder.bMisc = bNewValue
 End Property
 
@@ -438,8 +438,8 @@ Public Property Let UserKey(ByVal lNewValue As Long)
 End Property
 
 
-Public Property Get UserID() As String
-    UserID = m_udtOrder.sUserID
+Public Property Get userid() As String
+    userid = m_udtOrder.sUserID
 End Property
 
 
@@ -615,6 +615,8 @@ Public Sub Load(lOPKey As Long)
         Err.Raise -1, "Order.Load", _
             "Order.Load" & vbCrLf & "OPKey=" & lOPKey & " is not valid."
     End If
+    
+    m_oCustomer = New Customer
     
     Set orstOrder = LoadDiscRst("SELECT * FROM tcpSO WHERE OPKey=" & lOPKey)
     
@@ -2592,28 +2594,28 @@ End Function
 
 
 Private Function EventItemID(ByRef oItem As IItem) As String
-    Dim sItemID As String
+    Dim sItemId As String
     
     If oItem.ItemID = "" Then
         Select Case oItem.OPItemType
             Case itMoldedGasket
-                sItemID = oItem.Descr
+                sItemId = oItem.Descr
             Case itWarmerWire
-                sItemID = oItem.Descr
+                sItemId = oItem.Descr
             Case itSpecialOrder
-                sItemID = "SpecialOrder " & oItem.Descr
+                sItemId = "SpecialOrder " & oItem.Descr
             Case itBTOKit
-                sItemID = "BTOKit " & oItem.Descr
+                sItemId = "BTOKit " & oItem.Descr
             Case itFinishedGood
-                sItemID = "FinishedGood " & oItem.Descr
+                sItemId = "FinishedGood " & oItem.Descr
             Case itWireShelf
-                sItemID = oItem.Descr
+                sItemId = oItem.Descr
         End Select
     Else
-        sItemID = oItem.ItemID
+        sItemId = oItem.ItemID
     End If
     
-    EventItemID = sItemID
+    EventItemID = sItemId
 End Function
 
 
@@ -2647,7 +2649,7 @@ End Function
 
 Private Function EventOrderLineMM() As String
     Dim sTemp As String
-    Dim sItemID As String
+    Dim sItemId As String
     Dim oItem As IItem
     
     sTemp = "OrderLine Remarks were changed for:"
@@ -2655,12 +2657,12 @@ Private Function EventOrderLineMM() As String
     
     For Each oItem In m_oItems
         If oItem.RemarkContext.RemarkList.Dirty Then
-                sItemID = sItemID & " " & oItem.ItemID & ","
+                sItemId = sItemId & " " & oItem.ItemID & ","
                 Exit For
         End If
     Next
     
-    sTemp = sTemp & sItemID
+    sTemp = sTemp & sItemId
     
     If sTemp = EventOrderLineMM Then
         EventOrderLineMM = ""
@@ -2699,9 +2701,9 @@ Private Function EventOldOrderLine(ByRef oItem As IItem) As String
     Dim oTempItem As IItem
     Dim bNewItem As Boolean
     Dim bItemChange As Boolean
-    Dim sItemID As String
+    Dim sItemId As String
     
-    sItemID = EventItemID(oItem)
+    sItemId = EventItemID(oItem)
     
     bNewItem = True
     If Not m_oBackUpItems Is Nothing Then
@@ -2753,7 +2755,7 @@ Private Function EventOldOrderLine(ByRef oItem As IItem) As String
                     End If
                     
                     If bItemChange = True Then
-                        sTemp = "Modified " & sItemID & ". " & sTemp
+                        sTemp = "Modified " & sItemId & ". " & sTemp
                     Else
                         sTemp = ""
                     End If
@@ -2776,7 +2778,7 @@ Private Function EventOldOrderLine(ByRef oItem As IItem) As String
                 sStatus = StatusCodeString(oItem.StatusCode)
             End If
             
-            sTemp = "Add " & oItem.Qty & " " & sItemID & " to order. Price is $" _
+            sTemp = "Add " & oItem.Qty & " " & sItemId & " to order. Price is $" _
                     & oItem.EffectivePrice & " and cost is $" & oItem.Cost _
                     & ". The new item status is '" & sStatus & "'"
                     

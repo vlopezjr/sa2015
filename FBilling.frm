@@ -3,7 +3,7 @@ Object = "{D8F5B61D-9152-4399-BF30-A1E4F3F072F6}#4.0#0"; "IGTabs40.ocx"
 Object = "{CAF0FDE4-8332-11CF-BC13-0020AFD6738C}#1.0#0"; "newsota.ocx"
 Object = "{E684D8A3-716C-4E59-AA94-7144C04B0074}#1.1#0"; "GridEX20.ocx"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
-Object = "{24AB01F6-31FE-4657-A1CE-602D689527F9}#1.0#0"; "mmremark.ocx"
+Object = "{24AB01F6-31FE-4657-A1CE-602D689527F9}#1.0#0"; "MMRemark.ocx"
 Begin VB.Form FBilling 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Form1"
@@ -26,6 +26,7 @@ Begin VB.Form FBilling
       _ExtentY        =   11880
       _Version        =   262144
       TabCount        =   8
+      TagVariant      =   ""
       Tabs            =   "FBilling.frx":0000
       Begin ActiveTabs.SSActiveTabPanel SSActiveTabPanel9 
          Height          =   6345
@@ -814,7 +815,7 @@ Begin VB.Form FBilling
       End
       Begin ActiveTabs.SSActiveTabPanel SSActiveTabPanel4 
          Height          =   6345
-         Left            =   -99969
+         Left            =   30
          TabIndex        =   63
          Top             =   360
          Width           =   9555
@@ -969,7 +970,7 @@ Begin VB.Form FBilling
       End
       Begin ActiveTabs.SSActiveTabPanel SSActiveTabPanel1 
          Height          =   6345
-         Left            =   30
+         Left            =   -99969
          TabIndex        =   71
          Top             =   360
          Width           =   9555
@@ -2657,17 +2658,17 @@ Private Sub cmdUpdateSO_Click()
     If Trim(txtPO.text) = "" Then Exit Sub
     If m_lAddPOOPKey = 0 Or m_lAddPOSOKey = 0 Then Exit Sub
     
-    Dim oCmd As ADODB.Command
+    Dim ocmd As ADODB.Command
     
-    Set oCmd = CreateCommandSP("spCPCInsertPO")
-    With oCmd
+    Set ocmd = CreateCommandSP("spCPCInsertPO")
+    With ocmd
         .Parameters("@_iOPKey") = m_lAddPOOPKey
         .Parameters("@_iSOKey") = m_lAddPOSOKey
         .Parameters("@_iPurchOrd") = Left(Trim(txtPO.text), 15)  'Left() addded 8/28/02 LR
         .Execute
     End With
     
-    Set oCmd = Nothing
+    Set ocmd = Nothing
     m_lAddPOOPKey = 0
     m_lAddPOSOKey = 0
     
@@ -2879,15 +2880,15 @@ Private Sub cmdUpdate_Click()
     If m_lSOKey = 0 Then Exit Sub
     
     Dim sSQL As String
-    Dim oCmd As ADODB.Command
+    Dim ocmd As ADODB.Command
     
     SetWaitCursor True
     sSQL = "Update tsoSalesOrder set UserFld1 = " & chkPricePacking.value _
             & "Where SOKey = " & m_lSOKey
-    Set oCmd = CreateCommandSP(sSQL, adCmdText)
-    oCmd.Execute
+    Set ocmd = CreateCommandSP(sSQL, adCmdText)
+    ocmd.Execute
     
-    Set oCmd = Nothing
+    Set ocmd = Nothing
     SetWaitCursor False
     If vbYes = msg("Update Complete! Would you like to set a new search? ", _
                     vbYesNo + vbExclamation, "New Price Pack Slip Search?") Then
@@ -2952,6 +2953,7 @@ Dim sTemp As String
 End Sub
 
 Private Sub cmdGetBatches_Click()
+    'this uses the same call used by other
     GetShipmentBatches
 End Sub
 
@@ -3217,9 +3219,9 @@ Private Function GetSpecialHandlingRemarks(indent As String, OPKey As Long, Rema
 End Function
 
 
-Private Function IsHandlingCharge(Amount As Double) As Boolean
+Private Function IsHandlingCharge(amount As Double) As Boolean
     'Handling charges for MPK, STL, and SEA repectively.
-    If Amount = 1.5 Or Amount = 2 Or Amount = 1.75 Then
+    If amount = 1.5 Or amount = 2 Or amount = 1.75 Then
         IsHandlingCharge = True
     Else
         IsHandlingCharge = False
@@ -3872,12 +3874,12 @@ End Sub
 ' Utility Functions
 '************************************************************************
 
-Private Sub AttachGrid(ByRef i_oGrid As GridEX, ByRef i_orst As ADODB.Recordset)
+Private Sub AttachGrid(ByRef i_oGrid As GridEX, ByRef i_oRst As ADODB.Recordset)
     With i_oGrid
         Dim i As Long
         .HoldFields
         .HoldSortSettings = True
-        Set .ADORecordset = i_orst
+        Set .ADORecordset = i_oRst
         For i = 1 To .Columns.Count
             If .Columns(i).Key <> "TrackingNo" Then
                 .Columns(i).AutoSize
@@ -4233,7 +4235,7 @@ Private Sub MarkCCOrderAsBad(ByRef oOrder As Order)  '(ByVal OPKey As Long)
 
     For Each aTrans In oOrder.CreditCard.Transactions
         output = output & aTrans.TranType '   Trim(rst.Fields("trantype").Value) & "    "
-        output = output & aTrans.Amount '  rst.Fields("amount").Value & "  "
+        output = output & aTrans.amount '  rst.Fields("amount").Value & "  "
         output = output & aTrans.TimeStamp  '  rst.Fields("createdate").Value & "  "
         output = output & aTrans.PNREF ' rst.Fields("pnref").Value & "  "
         output = output & aTrans.Comment1 ' Trim(rst.Fields("comment1").Value) & "  "
